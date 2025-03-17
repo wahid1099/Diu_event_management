@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "336469512031",
+    "project_id": "diu-event-managemtn",
+    "storage_bucket": "diu-event-managemtn.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:336469512031:android:aad0bfb0bfcfb9c37db0ea",
+        "android_client_info": {
+          "package_name": "com.example.diu_evento"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKWjazqf3_GJ1MrNJvcd_g2B9RVe4F5-8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
