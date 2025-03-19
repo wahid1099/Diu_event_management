@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../widgets/admin_drawer.dart';
 
 class AdminDashboard extends StatefulWidget {
-  const AdminDashboard({Key? key}) : super(key: key);
+  const AdminDashboard({super.key});
 
   @override
   State<AdminDashboard> createState() => _AdminDashboardState();
@@ -14,8 +15,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.blue[700],
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.notifications),
+            onPressed: () {
+              // Handle notifications
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () {
+              // Handle settings
+            },
+          ),
+        ],
       ),
+      drawer: AdminDrawer(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
