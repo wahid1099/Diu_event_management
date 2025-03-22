@@ -12,7 +12,10 @@ dependencies:
   flutter:
     sdk: flutter
   # The following section is specific to Flutter packages.
-
+  image_picker:
+  fluttertoast:
+  universal_html:
+  intl:
   firebase_core:
   firebase_auth:
   firebase_auth_web:

@@ -25,8 +25,8 @@ class _LoginScreenState extends State<LoginScreen> {
     if (user != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => AdminDashboard()),
-      ); // Change to respective dashboard
+        MaterialPageRoute(builder: (context) => AdminDashboard(uid: user.uid)),
+      );
     }
   }
 
@@ -35,8 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
     if (user != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => AdminDashboard()),
-      ); // Change to respective dashboard
+        MaterialPageRoute(builder: (context) => AdminDashboard(uid: user.uid)),
+      );
     }
   }
 

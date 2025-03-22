@@ -1,87 +1,91 @@
 import 'package:flutter/material.dart';
+import 'package:diu_evento/screens/admin/events/add_event_screen.dart';
 
 class AdminDrawer extends StatelessWidget {
-  const AdminDrawer({super.key});
+  final String uid;
+  const AdminDrawer({super.key, required this.uid});
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: Container(
-        color: Colors.white,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.purple[200]!, Colors.purple[100]!],
+          ),
+        ),
         child: Column(
           children: [
-            SizedBox(height: 50),
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage('assets/images/admin_avatar.png'),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Admin Name',
-              style: TextStyle(
-                color: Colors.black87,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              'admin@diu.edu.bd',
-              style: TextStyle(color: Colors.grey, fontSize: 14),
-            ),
-            SizedBox(height: 20),
-            Divider(),
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
+            Container(
+              padding: EdgeInsets.only(top: 50, bottom: 20),
+              child: Column(
                 children: [
-                  _buildDrawerItem(
-                    icon: Icons.dashboard,
-                    title: 'Dashboard',
-                    onTap: () => Navigator.pop(context),
+                  CircleAvatar(
+                    radius: 45,
+                    backgroundImage: AssetImage(
+                      'assets/images/admin_avatar.png',
+                    ),
                   ),
-                  _buildDrawerItem(
-                    icon: Icons.group,
-                    title: 'Manage Clubs',
-                    onTap: () {},
+                  SizedBox(height: 12),
+                  Text(
+                    'John Doe',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
                   ),
-                  _buildDrawerItem(
-                    icon: Icons.event,
-                    title: 'Create Event',
-                    onTap: () {},
-                  ),
-                  _buildDrawerItem(
-                    icon: Icons.calendar_today,
-                    title: 'All Events',
-                    onTap: () {},
-                  ),
-                  _buildDrawerItem(
-                    icon: Icons.settings,
-                    title: 'Manage Events',
-                    onTap: () {},
-                  ),
-                  Divider(),
-                  _buildDrawerItem(
-                    icon: Icons.person,
-                    title: 'Profile',
-                    onTap: () {},
-                  ),
-                  _buildDrawerItem(
-                    icon: Icons.notifications,
-                    title: 'Notifications',
-                    onTap: () {},
-                  ),
-                  _buildDrawerItem(
-                    icon: Icons.settings,
-                    title: 'Settings',
-                    onTap: () {},
-                  ),
-                  Divider(),
-                  _buildDrawerItem(
-                    icon: Icons.logout,
-                    title: 'Logout',
-                    onTap: () {},
+                  Text(
+                    'john@email.com',
+                    style: TextStyle(fontSize: 14, color: Colors.black54),
                   ),
                 ],
+              ),
+            ),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: ListView(
+                  padding: EdgeInsets.only(top: 20),
+                  children: [
+                    _buildDrawerItem(
+                      icon: Icons.event_note_outlined,
+                      title: 'Add Event',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AddEventScreen(uid: uid),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildDrawerItem(
+                      icon: Icons.rate_review_outlined,
+                      title: 'Reviews',
+                      onTap: () {},
+                    ),
+                    _buildDrawerItem(
+                      icon: Icons.payment_outlined,
+                      title: 'Payments',
+                      onTap: () {},
+                    ),
+                    _buildDrawerItem(
+                      icon: Icons.settings_outlined,
+                      title: 'Settings',
+                      onTap: () {},
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -95,22 +99,19 @@ class AdminDrawer extends StatelessWidget {
     required String title,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      onHover: (hovering) {},
-      child: ListTile(
-        leading: Icon(icon, color: Colors.blue[700], size: 26),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
+    return ListTile(
+      contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      leading: Icon(icon, size: 26, color: Colors.black87),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 16,
+          color: Colors.black87,
+          fontWeight: FontWeight.w500,
         ),
-        dense: true,
-        horizontalTitleGap: 12,
       ),
+      onTap: onTap,
+      horizontalTitleGap: 20,
     );
   }
 }

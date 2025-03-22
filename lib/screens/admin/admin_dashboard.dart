@@ -3,7 +3,8 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../widgets/admin_drawer.dart';
 
 class AdminDashboard extends StatefulWidget {
-  const AdminDashboard({super.key});
+  final String uid;
+  const AdminDashboard({super.key, required this.uid});
 
   @override
   State<AdminDashboard> createState() => _AdminDashboardState();
@@ -32,7 +33,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
         ],
       ),
-      drawer: AdminDrawer(),
+      drawer: AdminDrawer(uid: widget.uid),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
