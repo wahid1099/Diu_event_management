@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:diu_evento/screens/admin/events/add_event_screen.dart';
+import 'package:diu_evento/screens/admin/events/events_list_screen.dart';
 
 class AdminDrawer extends StatelessWidget {
   final String uid;
@@ -57,6 +58,18 @@ class AdminDrawer extends StatelessWidget {
                 child: ListView(
                   padding: EdgeInsets.only(top: 20),
                   children: [
+                    _buildDrawerItem(
+                      icon: Icons.event,
+                      title: 'Events',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EventsListScreen(uid: uid),
+                          ),
+                        );
+                      },
+                    ),
                     _buildDrawerItem(
                       icon: Icons.event_note_outlined,
                       title: 'Add Event',
