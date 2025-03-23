@@ -1,11 +1,5 @@
-import 'dart:io';
-import 'dart:typed_data'; // Add this import
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:universal_html/html.dart' as html;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -20,42 +14,6 @@ class AddEventScreen extends StatefulWidget {
 class _AddEventScreenState extends State<AddEventScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
-  File? _imageFile;
-  Uint8List? _webImage;
-  final ImagePicker _picker = ImagePicker();
-
-  Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      if (kIsWeb) {
-        var bytes = await image.readAsBytes();
-        setState(() {
-          _webImage = bytes;
-        });
-      } else {
-        setState(() {
-          _imageFile = File(image.path);
-        });
-      }
-    }
-  }
-
-  Future<String> _uploadImage() async {
-    if (_imageFile == null && _webImage == null) return '';
-
-    final Reference storageRef = FirebaseStorage.instance
-        .ref()
-        .child('event_images')
-        .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
-
-    if (kIsWeb) {
-      await storageRef.putData(_webImage!);
-    } else {
-      await storageRef.putFile(_imageFile!);
-    }
-
-    return await storageRef.getDownloadURL();
-  }
 
   Future<void> _submitEvent() async {
     if (!_formKey.currentState!.validate()) return;
@@ -63,7 +21,11 @@ class _AddEventScreenState extends State<AddEventScreen> {
     setState(() => _isLoading = true);
 
     try {
-      String imageUrl = await _uploadImage();
+      String imageUrl = _imageUrlController.text;
+
+      if (imageUrl.isEmpty) {
+        throw Exception('Please provide an image URL');
+      }
 
       await FirebaseFirestore.instance.collection('events').add({
         'amount': int.parse(_amountController.text),
@@ -105,7 +67,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
   final _amountController = TextEditingController();
   final _capacityController = TextEditingController();
   final _locationController = TextEditingController();
-  DateTime _selectedDate = DateTime.now().add(Duration(days: 1));
+  final _imageUrlController = TextEditingController();
+  DateTime _selectedDate = DateTime.now();
 
   String _selectedCategory = 'Tech';
   String _selectedClub = 'Coding Club';
@@ -193,73 +156,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Image Picker
-                      GestureDetector(
-                        onTap: _pickImage,
-                        child: Container(
-                          height: 200,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey[300]!),
-                          ),
-                          child:
-                              kIsWeb
-                                  ? (_webImage != null
-                                      ? ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Image.memory(
-                                          _webImage!,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      )
-                                      : Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.add_photo_alternate,
-                                            size: 50,
-                                            color: Colors.grey,
-                                          ),
-                                          Text(
-                                            'Add Event Image',
-                                            style: TextStyle(
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      ))
-                                  : (_imageFile != null
-                                      ? ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Image.file(
-                                          _imageFile!,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      )
-                                      : Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.add_photo_alternate,
-                                            size: 50,
-                                            color: Colors.grey,
-                                          ),
-                                          Text(
-                                            'Add Event Image',
-                                            style: TextStyle(
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      )),
-                        ),
-                      ),
-                      SizedBox(height: 24),
-
-                      // Form Fields
+                      _buildTextField('Image URL', _imageUrlController),
                       _buildTextField('Event Title', _titleController),
                       _buildTextField(
                         'Description',
@@ -317,41 +214,23 @@ class _AddEventScreenState extends State<AddEventScreen> {
                       ),
 
                       // Date Picker
-                      Card(
-                        child: ListTile(
-                          title: Text('Event Date'),
-                          subtitle: Text(
-                            DateFormat(
-                              'MMM dd, yyyy HH:mm',
-                            ).format(_selectedDate),
-                          ),
-                          trailing: Icon(Icons.calendar_today),
-                          onTap: () async {
-                            final DateTime? picked = await showDatePicker(
-                              context: context,
-                              initialDate: _selectedDate,
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime(2025),
-                            );
-                            if (picked != null) {
-                              final TimeOfDay? time = await showTimePicker(
-                                context: context,
-                                initialTime: TimeOfDay.now(),
-                              );
-                              if (time != null) {
-                                setState(() {
-                                  _selectedDate = DateTime(
-                                    picked.year,
-                                    picked.month,
-                                    picked.day,
-                                    time.hour,
-                                    time.minute,
-                                  );
-                                });
-                              }
-                            }
-                          },
+                      ListTile(
+                        title: Text('Event Date'),
+                        subtitle: Text(
+                          DateFormat('MMM dd, yyyy').format(_selectedDate),
                         ),
+                        trailing: Icon(Icons.calendar_today),
+                        onTap: () async {
+                          final DateTime? date = await showDatePicker(
+                            context: context,
+                            initialDate: _selectedDate,
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(2025),
+                          );
+                          if (date != null) {
+                            setState(() => _selectedDate = date);
+                          }
+                        },
                       ),
 
                       SizedBox(height: 24),

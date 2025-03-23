@@ -12,6 +12,8 @@ dependencies:
   flutter:
     sdk: flutter
   # The following section is specific to Flutter packages.
+  http:
+  flutter_dotenv:
   image_picker:
   fluttertoast:
   universal_html:
@@ -41,5 +43,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - .env
     - assets/images/
     - assets/icons/
