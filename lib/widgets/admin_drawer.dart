@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:diu_evento/screens/login_screen.dart';
 import 'package:diu_evento/screens/admin/events/add_event_screen.dart';
 import 'package:diu_evento/screens/admin/events/events_list_screen.dart';
 
@@ -96,6 +97,55 @@ class AdminDrawer extends StatelessWidget {
                       icon: Icons.settings_outlined,
                       title: 'Settings',
                       onTap: () {},
+                    ),
+                    Divider(height: 32, thickness: 1),
+
+                    ListTile(
+                      leading: Icon(Icons.logout, color: Colors.red),
+                      title: Text(
+                        'Logout',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        // Show confirmation dialog
+                        showDialog(
+                          context: context,
+                          builder:
+                              (context) => AlertDialog(
+                                title: Text('Logout'),
+                                content: Text(
+                                  'Are you sure you want to logout?',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    child: Text('Cancel'),
+                                    onPressed: () => Navigator.pop(context),
+                                  ),
+                                  TextButton(
+                                    child: Text(
+                                      'Logout',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                    onPressed: () {
+                                      // Close drawer and dialog
+                                      Navigator.pop(context);
+                                      Navigator.pop(context);
+                                      // Navigate to login screen
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => LoginScreen(),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                        );
+                      },
                     ),
                   ],
                 ),

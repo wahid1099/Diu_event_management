@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/auth_service.dart';
 import '../screens/admin/admin_dashboard.dart'; // Import your admin dashboard
 import "../screens/register_screen.dart";
+import '../screens/home/home_screen.dart'; // Add import for HomeScreen
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,25 +19,64 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   final AuthService _authService = AuthService();
 
-  void login() async {
-    User? user = await _authService.signInWithEmail(
-      emailController.text,
-      passwordController.text,
-    );
-    if (user != null) {
-      Navigator.pushReplacement(
+  Future<void> login() async {
+    try {
+      User? user = await _authService.signInWithEmail(
+        emailController.text,
+        passwordController.text,
+      );
+      if (user != null) {
+        await _handleLogin(user);
+      }
+    } catch (e) {
+      // Show error message to user
+      ScaffoldMessenger.of(
         context,
-        MaterialPageRoute(builder: (context) => AdminDashboard(uid: user.uid)),
+      ).showSnackBar(SnackBar(content: Text('Login failed: ${e.toString()}')));
+    }
+  }
+
+  Future<void> loginWithGoogle() async {
+    try {
+      User? user = await _authService.signInWithGoogle();
+      if (user != null) {
+        await _handleLogin(user);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google login failed: ${e.toString()}')),
       );
     }
   }
 
-  void loginWithGoogle() async {
-    User? user = await _authService.signInWithGoogle();
-    if (user != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => AdminDashboard(uid: user.uid)),
+  Future<void> _handleLogin(User user) async {
+    try {
+      final userDoc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
+
+      final String role = userDoc.data()?['role'] ?? 'user';
+
+      if (!mounted) return;
+
+      if (role == 'admin') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AdminDashboard(uid: user.uid),
+          ),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen(uid: user.uid)),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error checking user role: ${e.toString()}')),
       );
     }
   }
