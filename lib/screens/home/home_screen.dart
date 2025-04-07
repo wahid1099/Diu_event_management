@@ -1,10 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:diu_evento/screens/events/event_details_screen.dart';
+import 'package:diu_evento/screens/profile/profile_screen.dart';
+import 'package:diu_evento/screens/events/all_events_screen.dart';
+import 'package:diu_evento/screens/bookings/my_bookings_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   final String uid;
   const HomeScreen({super.key, required this.uid});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    if (index == 1) {
+      // Events icon index
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const AllEventsScreen()),
+      );
+    } else if (index == 2) {
+      // My Bookings icon index
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MyBookingsScreen(uid: widget.uid),
+        ),
+      );
+    } else if (index == 3) {
+      // Profile icon index
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ProfileScreen(uid: widget.uid)),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +77,7 @@ class HomeScreen extends StatelessWidget {
                             stream:
                                 FirebaseFirestore.instance
                                     .collection('users')
-                                    .doc(uid)
+                                    .doc(widget.uid)
                                     .snapshots(),
                             builder: (context, snapshot) {
                               if (snapshot.hasData) {
@@ -109,28 +147,37 @@ class HomeScreen extends StatelessWidget {
                   stream:
                       FirebaseFirestore.instance
                           .collection('events')
-                          .where(
-                            'status',
-                            isEqualTo: 'appproved',
-                          ) // Fixed typo in status value
-                          .orderBy(
-                            'updated_at',
-                            descending: true,
-                          ) // Changed from created_at to updated_at
+                          .where('status', isEqualTo: 'approved')
+                          .orderBy('updated_at', descending: true)
+                          .limit(10)
                           .snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       print('Firestore Error: ${snapshot.error}');
-                      return Center(child: Text('Error: ${snapshot.error}'));
+                      return Center(
+                        child: Text(
+                          'Error: ${snapshot.error}',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      );
                     }
 
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator());
                     }
 
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return Center(child: Text('No events available'));
+                      print('No events found or empty data');
+                      return const Center(
+                        child: Text(
+                          'No events available',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      );
                     }
+
+                    // final events = snapshot.data!.docs;
+                    // print('Found ${events.length} events'); // Debug print
 
                     return ListView.builder(
                       scrollDirection: Axis.horizontal,
@@ -260,6 +307,8 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
@@ -268,8 +317,8 @@ class HomeScreen extends StatelessWidget {
             label: 'Events',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.location_on),
-            label: 'Explore',
+            icon: Icon(Icons.bookmark),
+            label: 'My Bookings',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],

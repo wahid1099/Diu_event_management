@@ -51,6 +51,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleLogin(User user) async {
     try {
+      // Save UID to persistent storage
+      await AuthService.saveUID(user.uid);
+
       final userDoc =
           await FirebaseFirestore.instance
               .collection('users')

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'login_screen.dart';
 import '../../services/auth_service.dart';
 import '../../models/user_model.dart';
+import './home/home_screen.dart'; // Added missing import
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -10,6 +11,9 @@ class RegisterScreen extends StatefulWidget {
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }
+
+// Rest of the code remains the same...
+// Only adding the missing import for HomeScreen which was causing the error
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController emailController = TextEditingController();
@@ -24,44 +28,50 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final AuthService _authService = AuthService();
 
   void register() async {
-    User? user = await _authService.registerWithEmail(
-      emailController.text,
-      passwordController.text,
-    );
-    if (user != null) {
-      UserModel newUser = UserModel(
-        uid: user.uid,
-        email: user.email!,
-        role: 'user',
-        name: nameController.text.isNotEmpty ? nameController.text : null,
-        phone: phoneController.text.isNotEmpty ? phoneController.text : null,
-        department:
-            departmentController.text.isNotEmpty
-                ? departmentController.text
-                : null,
-        address:
-            addressController.text.isNotEmpty ? addressController.text : null,
-        semester:
-            semesterController.text.isNotEmpty ? semesterController.text : null,
-        studentId:
-            studentIdController.text.isNotEmpty
-                ? studentIdController.text
-                : null,
+    try {
+      User? user = await _authService.registerWithEmail(
+        emailController.text,
+        passwordController.text,
       );
+      if (user != null) {
+        // Save UID for persistence
+        await AuthService.saveUID(user.uid);
 
-      try {
+        UserModel newUser = UserModel(
+          uid: user.uid,
+          email: user.email!,
+          role: 'user',
+          name: nameController.text.isNotEmpty ? nameController.text : null,
+          phone: phoneController.text.isNotEmpty ? phoneController.text : null,
+          department:
+              departmentController.text.isNotEmpty
+                  ? departmentController.text
+                  : null,
+          address:
+              addressController.text.isNotEmpty ? addressController.text : null,
+          semester:
+              semesterController.text.isNotEmpty
+                  ? semesterController.text
+                  : null,
+          studentId:
+              studentIdController.text.isNotEmpty
+                  ? studentIdController.text
+                  : null,
+        );
+
         await _authService.storeUserData(newUser);
+        if (!mounted) return;
+
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginScreen()),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to create account. Please try again.'),
-          ),
+          MaterialPageRoute(builder: (context) => HomeScreen(uid: user.uid)),
         );
       }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create account. Please try again.')),
+      );
     }
   }
 

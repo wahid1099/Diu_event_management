@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'book_event_screen.dart';
 
 class EventDetailsScreen extends StatelessWidget {
   final String eventId;
@@ -159,11 +161,29 @@ class EventDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
+      // Update the onPressed callback in the bottom navigation bar
       bottomNavigationBar: Padding(
         padding: EdgeInsets.all(16),
         child: ElevatedButton(
           onPressed: () {
-            // TODO: Implement registration logic
+            final currentUser = FirebaseAuth.instance.currentUser;
+            if (currentUser != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) => BookEventScreen(
+                        eventId: eventId,
+                        event: event,
+                        userId: currentUser.uid,
+                      ),
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Please login to book events')),
+              );
+            }
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.purple[200],

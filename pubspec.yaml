@@ -25,7 +25,7 @@ dependencies:
   firebase_storage:
   fl_chart:
   google_sign_in:
-
+  shared_preferences:
   cupertino_icons: ^1.0.8
 
   # The following adds the Cupertino Icons font to your application.
