@@ -75,9 +75,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _signOut() async {
     await _authService.signOut();
     if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
+    // Replace all routes with login screen
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (Route<dynamic> route) => false, // Remove all previous routes
     );
   }
 
@@ -197,19 +198,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                ElevatedButton(
+                ElevatedButton.icon(
                   onPressed: _signOut,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 50,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                  icon: const Icon(Icons.logout_rounded, color: Colors.white),
+                  label: const Text(
+                    'Sign Out',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  child: const Text('Sign Out'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFE53935), // Modern red color
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 2,
+                  ),
                 ),
               ],
             ),

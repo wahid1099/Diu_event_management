@@ -23,7 +23,7 @@ dependencies:
   firebase_auth_web:
   cloud_firestore:
   firebase_storage:
-  fl_chart:
+  fl_chart: ^0.65.0
   google_sign_in:
   shared_preferences:
   cupertino_icons: ^1.0.8

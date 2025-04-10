@@ -27,6 +27,35 @@ class _AddEventScreenState extends State<AddEventScreen> {
         throw Exception('Please provide an image URL');
       }
 
+      // In your form fields
+      DropdownButtonFormField<String>(
+        value: _selectedCategory,
+        decoration: InputDecoration(
+          labelText: 'Category',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        items: ['Workshop', 'Seminar', 'Conference', 'Cultural', 'Sports']
+            .map((category) => DropdownMenuItem(
+                  value: category,
+                  child: Text(category),
+                ))
+            .toList(),
+        onChanged: (value) {
+          setState(() {
+            _selectedCategory = value!;
+          });
+        },
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please select a category';
+          }
+          return null;
+        },
+      );
+      
+      // When saving the event data
       await FirebaseFirestore.instance.collection('events').add({
         'amount': int.parse(_amountController.text),
         'attendees': ["200"],

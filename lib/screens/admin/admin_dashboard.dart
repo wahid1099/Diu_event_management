@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../widgets/admin_drawer.dart';
 
@@ -20,13 +21,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications),
+            icon: const Icon(Icons.notifications),
             onPressed: () {
               // Handle notifications
             },
           ),
           IconButton(
-            icon: Icon(Icons.settings),
+            icon: const Icon(Icons.settings),
             onPressed: () {
               // Handle settings
             },
@@ -46,9 +47,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
               crossAxisSpacing: 16.0,
               mainAxisSpacing: 16.0,
               children: [
-                _buildStatsCard('Total Events', '156', Icons.event),
-                _buildStatsCard('Active Users', '2,453', Icons.people),
-                _buildStatsCard('Revenue', '\$15,240', Icons.attach_money),
+                _buildStatsCard('Total Events', '15', Icons.event),
+                _buildStatsCard('Active Users', '24', Icons.people),
+                _buildStatsCard('Total Revenue', '৳24', Icons.attach_money),
               ],
             ),
             const SizedBox(height: 24.0),
@@ -70,24 +71,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
               child: LineChart(
                 LineChartData(
-                  gridData: FlGridData(show: true),
-                  titlesData: FlTitlesData(show: true),
+                  gridData: const FlGridData(show: true),
+                  titlesData: const FlTitlesData(show: true),
                   borderData: FlBorderData(show: true),
                   lineBarsData: [
                     LineChartBarData(
-                      spots: [
-                        const FlSpot(0, 3),
-                        const FlSpot(2.6, 2),
-                        const FlSpot(4.9, 5),
-                        const FlSpot(6.8, 3.1),
-                        const FlSpot(8, 4),
-                        const FlSpot(9.5, 3),
-                        const FlSpot(11, 4),
+                      spots: const [
+                        FlSpot(0, 3),
+                        FlSpot(2.6, 2),
+                        FlSpot(4.9, 5),
+                        FlSpot(6.8, 3.1),
+                        FlSpot(8, 4),
+                        FlSpot(9.5, 3),
+                        FlSpot(11, 4),
                       ],
                       isCurved: true,
                       color: Colors.blue,
                       barWidth: 3,
-                      dotData: FlDotData(show: false),
+                      dotData: const FlDotData(show: false),
                     ),
                   ],
                 ),
