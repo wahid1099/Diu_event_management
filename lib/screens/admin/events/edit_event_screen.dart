@@ -35,9 +35,22 @@ class _EditEventScreenState extends State<EditEventScreen> {
   late String _selectedMode;
   late String _selectedType;
 
+  // Add to the existing state variables
+  late TextEditingController _imageUrlController;
+
+  // Add to state variables
+  late String _selectedStatus;
+
+  // Add to initState
   @override
   void initState() {
     super.initState();
+    // Add this with other initializations
+    _selectedStatus = widget.eventData['status']?.toString() ?? _statuses[0];
+    // Add this with other controller initializations
+    _imageUrlController = TextEditingController(
+      text: widget.eventData['image_url']?.toString() ?? '',
+    );
     // Initialize controllers with existing data with null safety
     _titleController = TextEditingController(
       text: widget.eventData['event_title']?.toString() ?? '',
@@ -87,6 +100,8 @@ class _EditEventScreenState extends State<EditEventScreen> {
             'mode': _selectedMode,
             'type': _selectedType,
             'updated_at': Timestamp.now(),
+            'image_url': _imageUrlController.text,
+            'status': _selectedStatus,
           });
 
       Navigator.pop(context);
@@ -169,6 +184,10 @@ class _EditEventScreenState extends State<EditEventScreen> {
     );
   }
 
+  // Add status options list with other lists
+  final List<String> _statuses = ['pending', 'approved', 'rejected'];
+
+  // In the build method, add the status dropdown before the save button
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -187,6 +206,34 @@ class _EditEventScreenState extends State<EditEventScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Add this at the top of the form
+                      Container(
+                        width: double.infinity,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child:
+                            _imageUrlController.text.isNotEmpty
+                                ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    _imageUrlController.text,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Center(child: Icon(Icons.error)),
+                                  ),
+                                )
+                                : Center(child: Icon(Icons.image)),
+                      ),
+                      SizedBox(height: 16),
+                      _buildTextField(
+                        'Image URL',
+                        _imageUrlController,
+                        keyboardType: TextInputType.url,
+                      ),
                       _buildTextField('Event Title', _titleController),
                       _buildTextField(
                         'Description',
@@ -254,6 +301,13 @@ class _EditEventScreenState extends State<EditEventScreen> {
                         _selectedType,
                         (value) => setState(() => _selectedType = value!),
                       ),
+                      // Add status dropdown here
+                      _buildDropdown(
+                        'Status',
+                        _statuses,
+                        _selectedStatus,
+                        (value) => setState(() => _selectedStatus = value!),
+                      ),
                     ],
                   ),
                 ),
@@ -268,6 +322,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
 
   @override
   void dispose() {
+    _imageUrlController.dispose(); // Add this
     _titleController.dispose();
     _descriptionController.dispose();
     _amountController.dispose();

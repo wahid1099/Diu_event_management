@@ -27,38 +27,19 @@ class _AddEventScreenState extends State<AddEventScreen> {
         throw Exception('Please provide an image URL');
       }
 
-      // In your form fields
-      DropdownButtonFormField<String>(
-        value: _selectedCategory,
-        decoration: InputDecoration(
-          labelText: 'Category',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        items: ['Workshop', 'Seminar', 'Conference', 'Cultural', 'Sports']
-            .map((category) => DropdownMenuItem(
-                  value: category,
-                  child: Text(category),
-                ))
-            .toList(),
-        onChanged: (value) {
-          setState(() {
-            _selectedCategory = value!;
-          });
-        },
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Please select a category';
-          }
-          return null;
-        },
-      );
-      
+      // Validate all required fields
+      if (_titleController.text.isEmpty ||
+          _descriptionController.text.isEmpty ||
+          _amountController.text.isEmpty ||
+          _capacityController.text.isEmpty ||
+          _locationController.text.isEmpty) {
+        throw Exception('Please fill all required fields');
+      }
+
       // When saving the event data
       await FirebaseFirestore.instance.collection('events').add({
         'amount': int.parse(_amountController.text),
-        'attendees': ["200"],
+        'attendees': [],
         'capacity': int.parse(_capacityController.text),
         'category': _selectedCategory,
         'club_name': _selectedClub,
@@ -70,7 +51,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
         'image_url': imageUrl,
         'location': _locationController.text,
         'mode': _selectedMode,
-        'status': 'pending',
+        'status': _selectedStatus, // Now using selected status
         'type': _selectedType,
         'updated_at': Timestamp.now(),
       });
@@ -140,6 +121,9 @@ class _AddEventScreenState extends State<AddEventScreen> {
               return DropdownMenuItem(value: item, child: Text(item));
             }).toList(),
         onChanged: onChanged,
+        validator:
+            (value) =>
+                value == null || value.isEmpty ? 'Please select $label' : null,
       ),
     );
   }
@@ -165,6 +149,20 @@ class _AddEventScreenState extends State<AddEventScreen> {
         validator: (value) => value!.isEmpty ? 'Please enter $label' : null,
       ),
     );
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2025),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
   }
 
   @override
@@ -243,23 +241,29 @@ class _AddEventScreenState extends State<AddEventScreen> {
                       ),
 
                       // Date Picker
-                      ListTile(
-                        title: Text('Event Date'),
-                        subtitle: Text(
-                          DateFormat('MMM dd, yyyy').format(_selectedDate),
+                      InkWell(
+                        onTap: () => _selectDate(context),
+                        child: InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: 'Event Date',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                DateFormat(
+                                  'MMM dd, yyyy',
+                                ).format(_selectedDate),
+                              ),
+                              Icon(Icons.calendar_today),
+                            ],
+                          ),
                         ),
-                        trailing: Icon(Icons.calendar_today),
-                        onTap: () async {
-                          final DateTime? date = await showDatePicker(
-                            context: context,
-                            initialDate: _selectedDate,
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime(2025),
-                          );
-                          if (date != null) {
-                            setState(() => _selectedDate = date);
-                          }
-                        },
                       ),
 
                       SizedBox(height: 24),

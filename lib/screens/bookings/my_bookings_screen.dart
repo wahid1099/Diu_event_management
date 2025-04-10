@@ -66,6 +66,7 @@ class MyBookingsScreen extends StatelessWidget {
                     ),
                     child: InkWell(
                       onTap: () {
+                        // In the InkWell onTap:
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -73,6 +74,7 @@ class MyBookingsScreen extends StatelessWidget {
                                 (context) => EventDetailsScreen(
                                   eventId: booking['event_id'],
                                   event: event,
+                                  uid: uid,
                                 ),
                           ),
                         );

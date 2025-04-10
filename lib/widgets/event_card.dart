@@ -4,11 +4,13 @@ import 'package:diu_evento/screens/events/event_details_screen.dart';
 class EventCard extends StatelessWidget {
   final Map<String, dynamic> eventData;
   final String eventId;
+  final String uid; // Add this
 
   const EventCard({
     super.key,
     required this.eventData,
     required this.eventId,
+    required this.uid, // Add this
   });
 
   @override
@@ -16,19 +18,19 @@ class EventCard extends StatelessWidget {
     return Card(
       elevation: 3,
       margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         // Update the navigation part in the EventCard
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => EventDetailsScreen(
-                eventId: eventId,
-                event: eventData,
-              ),
+              builder:
+                  (context) => EventDetailsScreen(
+                    eventId: eventId,
+                    event: eventData,
+                    uid: uid, // Add this
+                  ),
             ),
           );
         },
@@ -36,7 +38,9 @@ class EventCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
               child: Image.network(
                 eventData['image_url'] ?? 'https://via.placeholder.com/400x200',
                 height: 200,
@@ -82,10 +86,7 @@ class EventCard extends StatelessWidget {
                       const Spacer(),
                       Text(
                         eventData['event_date'] ?? 'No date',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
                       ),
                     ],
                   ),
@@ -102,15 +103,16 @@ class EventCard extends StatelessWidget {
                     eventData['description'] ?? 'No description available',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+                      Icon(
+                        Icons.location_on,
+                        size: 16,
+                        color: Colors.grey[600],
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(

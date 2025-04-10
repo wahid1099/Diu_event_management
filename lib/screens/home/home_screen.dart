@@ -16,19 +16,20 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
+  // Fix the _onItemTapped method
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
 
     if (index == 1) {
-      // Events icon index
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const AllEventsScreen()),
+        MaterialPageRoute(
+          builder: (context) => AllEventsScreen(uid: widget.uid),
+        ),
       );
     } else if (index == 2) {
-      // My Bookings icon index
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -36,7 +37,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     } else if (index == 3) {
-      // Profile icon index
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => ProfileScreen(uid: widget.uid)),
@@ -135,12 +135,24 @@ class _HomeScreenState extends State<HomeScreen> {
                     'Popular Events 🔥',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  TextButton(onPressed: () {}, child: Text('VIEW ALL')),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => AllEventsScreen(uid: widget.uid),
+                        ),
+                      );
+                    },
+                    child: Text('VIEW ALL'),
+                  ),
                 ],
               ),
               SizedBox(height: 16),
 
               // Popular Events Cards
+              // Update the ListView.builder to ensure proper horizontal scrolling
               SizedBox(
                 height: 280,
                 child: StreamBuilder<QuerySnapshot>(
@@ -181,6 +193,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     return ListView.builder(
                       scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       itemCount: snapshot.data!.docs.length,
                       itemBuilder: (context, index) {
                         final event =
@@ -197,6 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     (context) => EventDetailsScreen(
                                       eventId: eventId,
                                       event: event,
+                                      uid: widget.uid,
                                     ),
                               ),
                             );
