@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'login_screen.dart';
 import '../../services/auth_service.dart';
 import '../../models/user_model.dart';
-import './home/home_screen.dart'; // Added missing import
+import './home/home_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -12,10 +12,10 @@ class RegisterScreen extends StatefulWidget {
   _RegisterScreenState createState() => _RegisterScreenState();
 }
 
-// Rest of the code remains the same...
-// Only adding the missing import for HomeScreen which was causing the error
-
 class _RegisterScreenState extends State<RegisterScreen> {
+  bool _isPasswordVisible = false;
+  bool _isLoading = false;
+
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
@@ -28,13 +28,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final AuthService _authService = AuthService();
 
   void register() async {
+    setState(() => _isLoading = true);
+
     try {
       User? user = await _authService.registerWithEmail(
         emailController.text,
         passwordController.text,
       );
       if (user != null) {
-        // Save UID for persistence
         await AuthService.saveUID(user.uid);
 
         UserModel newUser = UserModel(
@@ -72,6 +73,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to create account. Please try again.')),
       );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -102,7 +107,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 style: TextStyle(color: Colors.grey[600], fontSize: 16),
               ),
               SizedBox(height: 32),
-              // All TextFields with updated design
               TextField(
                 controller: nameController,
                 decoration: InputDecoration(
@@ -137,11 +141,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
               SizedBox(height: 16),
               TextField(
                 controller: passwordController,
-                obscureText: true,
+                obscureText: !_isPasswordVisible,
                 decoration: InputDecoration(
                   hintText: 'Type your password',
                   prefixIcon: Icon(Icons.lock_outline),
-                  suffixIcon: Icon(Icons.visibility_off_outlined),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off_outlined,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(color: Colors.grey[300]!),
@@ -237,21 +252,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: register,
+                  onPressed: _isLoading ? null : register,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black87,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text(
-                    'SIGN UP',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+                  child:
+                      _isLoading
+                          ? SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                          : Text(
+                            'SIGN UP',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                 ),
               ),
               SizedBox(height: 24),

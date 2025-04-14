@@ -25,14 +25,26 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
   Query<Map<String, dynamic>> _buildQuery() {
     Query<Map<String, dynamic>> query = FirebaseFirestore.instance
         .collection('events')
-        .where('status', isEqualTo: 'approved')
-        .orderBy('date', descending: false);
+        .where('status', isEqualTo: 'approved');
 
     if (_selectedCategory != 'All') {
-      query = query.where('category', isEqualTo: _selectedCategory);
+      return query
+          .where('category', isEqualTo: _selectedCategory)
+          .orderBy('date', descending: false);
     }
 
-    return query;
+    return query.orderBy('date', descending: false);
+  }
+
+  Widget _buildErrorImage() {
+    return Container(
+      color: Colors.grey[300],
+      child: const Icon(
+        Icons.image_not_supported,
+        color: Colors.grey,
+        size: 32,
+      ),
+    );
   }
 
   @override
@@ -44,7 +56,6 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
       ),
       body: Column(
         children: [
-          // Category Filter
           Container(
             height: 60,
             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -70,22 +81,43 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
               },
             ),
           ),
-
-          // Events Grid
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _buildQuery().snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return const Center(child: Text('Something went wrong'));
+                  return Center(
+                    child: Text(
+                      'Error: ${snapshot.error}',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  );
                 }
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text('No events found'));
+                final events = snapshot.data?.docs ?? [];
+
+                if (events.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.event_busy,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No events found for ${_selectedCategory.toLowerCase()} category',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                  );
                 }
 
                 return GridView.builder(
@@ -96,10 +128,17 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
                   ),
-                  itemCount: snapshot.data!.docs.length,
+                  itemCount: events.length,
                   itemBuilder: (context, index) {
-                    final event = snapshot.data!.docs[index];
-                    final eventData = event.data() as Map<String, dynamic>;
+                    final eventDoc = events[index];
+                    final eventData = eventDoc.data() as Map<String, dynamic>;
+
+                    final imageUrl = eventData['image_url'] as String? ?? '';
+                    final title =
+                        eventData['event_title'] as String? ?? 'Untitled Event';
+                    final date = eventData['date'] as Timestamp?;
+                    final location =
+                        eventData['location'] as String? ?? 'No location';
 
                     return Card(
                       clipBehavior: Clip.antiAlias,
@@ -113,7 +152,7 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
                             MaterialPageRoute(
                               builder:
                                   (context) => EventDetailsScreen(
-                                    eventId: event.id,
+                                    eventId: eventDoc.id,
                                     event: eventData,
                                     uid: widget.uid,
                                   ),
@@ -123,17 +162,19 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Image.network(
-                              eventData['image_url'] ?? '',
+                            SizedBox(
                               height: 120,
                               width: double.infinity,
-                              fit: BoxFit.cover,
-                              errorBuilder:
-                                  (context, error, stackTrace) => Container(
-                                    height: 120,
-                                    color: Colors.grey[300],
-                                    child: const Icon(Icons.error),
-                                  ),
+                              child:
+                                  imageUrl.isNotEmpty
+                                      ? Image.network(
+                                        imageUrl,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                _buildErrorImage(),
+                                      )
+                                      : _buildErrorImage(),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8),
@@ -141,7 +182,7 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    eventData['event_title'] ?? '',
+                                    title,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -151,9 +192,11 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    DateFormat('MMM dd, yyyy').format(
-                                      (eventData['date'] as Timestamp).toDate(),
-                                    ),
+                                    date != null
+                                        ? DateFormat(
+                                          'MMM dd, yyyy',
+                                        ).format(date.toDate())
+                                        : 'Date not set',
                                     style: TextStyle(
                                       color: Colors.grey[600],
                                       fontSize: 12,
@@ -161,7 +204,7 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    eventData['location'] ?? '',
+                                    location,
                                     style: TextStyle(
                                       color: Colors.grey[600],
                                       fontSize: 12,

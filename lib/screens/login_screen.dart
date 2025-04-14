@@ -6,6 +6,7 @@ import '../../services/auth_service.dart';
 import '../screens/admin/admin_dashboard.dart'; // Import your admin dashboard
 import "../screens/register_screen.dart";
 import '../screens/home/home_screen.dart'; // Add import for HomeScreen
+import '../screens/auth/forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,27 +28,30 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _isLoading = true;
       });
-      
+
       try {
-        final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
-        
+        final userCredential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(
+              email: _emailController.text.trim(),
+              password: _passwordController.text,
+            );
+
         if (!mounted) return;
-        
+
         if (userCredential.user != null) {
           // Check if user is admin
-          final userDoc = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(userCredential.user!.uid)
-              .get();
+          final userDoc =
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(userCredential.user!.uid)
+                  .get();
 
           if (userDoc.exists && userDoc.data()?['role'] == 'admin') {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => AdminDashboard(uid: userCredential.user!.uid),
+                builder:
+                    (context) => AdminDashboard(uid: userCredential.user!.uid),
               ),
             );
           } else {
@@ -75,10 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
             errorMessage = 'An error occurred during sign in';
         }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
         );
       } finally {
         if (mounted) {
@@ -95,18 +96,21 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _isLoading = true;
       });
-      
+
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return;
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-      
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        credential,
+      );
+
       if (!mounted) return;
 
       if (userCredential.user != null) {
@@ -192,7 +196,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                       ),
                       onPressed: () {
                         setState(() {
@@ -216,6 +222,29 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 8),
+                // Add Forgot Password button
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordScreen(),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      'Forgot Password?',
+                      style: TextStyle(
+                        color: Colors.blue[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
@@ -228,23 +257,24 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
+                    child:
+                        _isLoading
+                            ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                            : const Text(
+                              'SIGN IN',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          )
-                        : const Text(
-                            'SIGN IN',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -293,12 +323,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(color: Colors.grey[600]),
                     ),
                     TextButton(
-                      onPressed: () => Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const RegisterScreen(),
-                        ),
-                      ),
+                      onPressed:
+                          () => Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const RegisterScreen(),
+                            ),
+                          ),
                       child: Text(
                         'Sign Up',
                         style: TextStyle(

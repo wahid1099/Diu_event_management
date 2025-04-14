@@ -1,17 +1,19 @@
 import 'dart:async';
-import 'dart:ui';  
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import 'onboarding_screen.dart';
+import 'auth/auth_wrapper.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
   double _progress = 0.0;
@@ -19,37 +21,49 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    
-    // Logo animation setup
+
+    // Initialize animation controller
     _controller = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    );
+
+    // Create scale animation
+    _animation = Tween<double>(
+      begin: 0.5,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    // Start animation
     _controller.forward();
 
-    // Progress bar animation
-    Timer.periodic(Duration(milliseconds: 50), (timer) {
-      setState(() {
-        if (_progress < 1.0) {
+    // Animate progress bar
+    Timer.periodic(const Duration(milliseconds: 50), (timer) {
+      if (_progress < 1.0) {
+        setState(() {
           _progress += 0.02;
-        } else {
-          timer.cancel();
-          Navigator.pushReplacement(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (_, __, ___) => OnboardingScreen(),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                return FadeTransition(opacity: animation, child: child);
-              },
-            ),
-          );
-        }
-      });
+        });
+      } else {
+        timer.cancel();
+        _navigateToNextScreen();
+      }
     });
+  }
+
+  Future<void> _navigateToNextScreen() async {
+    // Check if it's first time launch
+    bool isFirstTime = true; // You can use shared preferences to check this
+
+    if (!mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) =>
+                isFirstTime ? const OnboardingScreen() : const AuthWrapper(),
+      ),
+    );
   }
 
   @override
@@ -62,7 +76,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/Splashscreen.png'),
             fit: BoxFit.cover,
@@ -90,7 +104,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     height: 120,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      image: DecorationImage(
+                      image: const DecorationImage(
                         image: AssetImage('assets/icons/diu_logo.jpg'),
                         fit: BoxFit.cover,
                       ),
@@ -104,18 +118,21 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     ),
                   ),
                 ),
-                SizedBox(height: 30),
-                ClipRRect(  // Wrap with ClipRRect for blur effect
+                const SizedBox(height: 30),
+                ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: BackdropFilter(  // Use BackdropFilter widget
+                  child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 25,
+                        vertical: 15,
+                      ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         color: Colors.white.withOpacity(0.15),
                       ),
-                      child: Text(
+                      child: const Text(
                         "DIU Event Manager",
                         style: TextStyle(
                           fontSize: 32,
@@ -126,7 +143,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                             Shadow(
                               offset: Offset(2, 2),
                               blurRadius: 3.0,
-                              color: Colors.black.withOpacity(0.5),
+                              color: Color.fromRGBO(0, 0, 0, 0.5),
                             ),
                           ],
                         ),
@@ -134,15 +151,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     ),
                   ),
                 ),
-                SizedBox(height: 40),
-                Container(
+                const SizedBox(height: 40),
+                SizedBox(
                   width: 200,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: LinearProgressIndicator(
                       value: _progress,
                       backgroundColor: Colors.white.withOpacity(0.2),
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.white,
+                      ),
                       minHeight: 6,
                     ),
                   ),
